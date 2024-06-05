@@ -10,9 +10,10 @@ const MainSection = () => {
 		const loadSuggestions = async () => {
 			if (location.length > 2) {
 				const response = await axios.get(
-					`https://api.openweathermap.org/geo/1.0/direct?q=${location}&appid=38fb2dd35fee522d8ec4f4fb7793f9df`
-                );
-                console.log("Response" + {response});
+					`https://about:blank/`
+					//`https://api.openweathermap.org/geo/1.0/direct?q=${location}&appid=38fb2dd35fee522d8ec4f4fb7793f9df`
+				);
+				console.log("Response" + { response });
 				setSuggestions(response.data.map((loc) => loc.name));
 			} else {
 				setSuggestions([]);
@@ -32,7 +33,7 @@ const MainSection = () => {
 			<Container className="mt-4">
 				<Row>
 					<Col>
-						<h1 className="text-center">Tell me about...</h1>
+						<h1 className="text-center">Search for locations</h1>
 					</Col>
 				</Row>
 				<Row className="justify-content-center mt-4">
