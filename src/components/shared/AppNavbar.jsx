@@ -1,5 +1,6 @@
 import React from "react";
-import { Navbar, Nav, Form, FormControl, Button, InputGroup } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import { Navbar, Nav, Form, FormControl, Button } from "react-bootstrap";
 import { BsSearch } from "react-icons/bs";
 
 const AppNavbar = () => {
@@ -13,15 +14,15 @@ const AppNavbar = () => {
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
                 <Nav className="me-auto">
-                    <Nav.Link href="#" className="text-white px-5">
+                    <Nav.Link as={Link} to="/" className="text-white px-5">
                         Home
                     </Nav.Link>
                     {isLoggedIn ? (
-                        <Nav.Link href="#" className="text-white px-5">
+                        <Nav.Link as={Link} to="/favourites" className="text-white px-5">
                             My saved Locations
                         </Nav.Link>
                     ) : (
-                        <Nav.Link href="#" className="text-white px-1">
+                        <Nav.Link as={Link} to="/login" className="text-white px-1">
                             Login
                         </Nav.Link>
                     )}
