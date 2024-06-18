@@ -1,7 +1,6 @@
 import React from "react";
 import { Card, Row, Col } from "react-bootstrap";
 import { BsCloudSun } from "react-icons/bs";
-import StyledWeatherCard from "../shared/StyledWeatherCard";
 
 const WeatherCard = ({ date, temperature, description, layout }) => {
 	return (

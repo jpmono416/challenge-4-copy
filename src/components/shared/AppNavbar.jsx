@@ -2,8 +2,6 @@ import React from "react";
 import { Navbar, Nav, Form, FormControl, Button, InputGroup } from "react-bootstrap";
 import { BsSearch } from "react-icons/bs";
 
-console.log({ Navbar, Nav, Form, FormControl, Button, InputGroup, BsSearch });
-
 const AppNavbar = () => {
 	return (
 		<Navbar bg="dark" expand="lg" className="text-white px-5">
