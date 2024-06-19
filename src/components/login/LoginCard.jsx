@@ -1,5 +1,9 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 import { Card, Form, Button, Alert } from "react-bootstrap";
+import AuthProvider, { AuthContext } from "../../auth/AuthProvider.jsx";
+import UserService from "../../service/User.service.js";
 
 const LoginCard = () => {
     const [isRegister, setIsRegister] = useState(false);
@@ -7,38 +11,62 @@ const LoginCard = () => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [validationMessage, setValidationMessage] = useState("");
+    const navigate = useNavigate();
 
     const handleSwitchForm = () => {
         setIsRegister(!isRegister);
-        setEmail("");
-        setPassword("");
         setConfirmPassword("");
         setValidationMessage("");
+        //? Intentionally not resetting the relevant fields when switching forms as it can be annoying for the user
     };
 
-    const checkPasswordRules = (password) => {
-        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}$/;
-        return regex.test(password);
-    };
-
-    const handleSubmit = (e) => {
+    const { login } = useContext(AuthContext);
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setValidationMessage("");
 
-        if (isRegister && password !== confirmPassword) {
-            setValidationMessage("Passwords do not match");
-            return;
-        }
+        if (isRegister) {
+            const validation = UserService.validateCredentials({
+                email,
+                password,
+                confirmPassword,
+            });
 
-        // Check password rules
-        if (isRegister && !checkPasswordRules(password)) {
-            setValidationMessage(
-                "Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, and a special character."
-            );
-            return;
-        }
+            if (!validation.isValid) setValidationMessage(validation.message);
+            else {
+                const response = await UserService.registerUser({ email, password });
+                if (response.failed) {
+                    setValidationMessage(response.message);
+                    return;
+                }
 
-        console.log("Form submitted");
+                const {
+                    user: { password: _, ...userWithoutPassword }, // Destructure password out of the user for storage
+                    token,
+                } = response;
+                console.log("User: ", userWithoutPassword, "Token: ", token);
+                
+                if (login(userWithoutPassword, token))
+                {
+                    //? Backend tokens are set to expire in 24h
+                    Cookies.set("token", token, { expires: 1 });
+                    navigate("/");
+                }
+
+            }
+        } else {
+            // const response = await UserService.loginUser({ email, password });
+            // if (response.failed) {
+            //     setValidationMessage(response.message);
+            //     return;
+            // }
+            // // Destructure to exclude password from the user object
+            // const {
+            //     user: { password: _, ...userWithoutPassword },
+            //     token,
+            // } = response;
+            // console.log("User: ", userWithoutPassword, "Token: ", token);
+        }
     };
 
     return (

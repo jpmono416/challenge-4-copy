@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { Navbar, Nav, Form, FormControl, Button } from "react-bootstrap";
 import { BsSearch } from "react-icons/bs";
+import { AuthContext } from "../../auth/AuthProvider.jsx";
 
 const AppNavbar = () => {
-    const isLoggedIn = false; // Replace with your login logic
+    const { authToken } = useContext(AuthContext); // Replace with your login logic
 
     return (
         <Navbar bg="dark" expand="lg" className="text-white px-5">
@@ -17,7 +18,7 @@ const AppNavbar = () => {
                     <Nav.Link as={Link} to="/" className="text-white px-5">
                         Home
                     </Nav.Link>
-                    {isLoggedIn ? (
+                    {authToken !== "" ? (
                         <Nav.Link as={Link} to="/favourites" className="text-white px-5">
                             My saved Locations
                         </Nav.Link>
