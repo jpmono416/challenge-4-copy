@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import FavouriteSection from "./components/favourites/FavouriteSection";
 import WeatherSection from "./components/application/WeatherSection";
