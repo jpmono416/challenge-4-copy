@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { getCitiesData } from "../../utils/getCitiesData.js";
+import { navigateToWeather } from "../../utils/navigationHelper.js";
 
 const MainSection = () => {
     const navigate = useNavigate();
@@ -36,7 +37,7 @@ const MainSection = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        navigate(`/weather?location=${encodeURIComponent(location)}`);
+        navigateToWeather(navigate, location);
     };
 
     return (

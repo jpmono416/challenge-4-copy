@@ -1,15 +1,32 @@
-import React, { useContext } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Navbar, Nav, Form, FormControl, Button } from "react-bootstrap";
 import { BsSearch } from "react-icons/bs";
 import { AuthContext } from "../../auth/AuthProvider.jsx";
+import { navigateToWeather } from "../../utils/navigationHelper.js";
 
 const AppNavbar = () => {
     const { authToken, logout } = useContext(AuthContext); // Replace with your login logic
+    const [location, setLocation] = useState("");
+    const navigate = useNavigate();
+
+    const getPath = () => {
+        const url = useLocation();
+        return url.pathname;
+    };
 
     const handleLogout = () => {
         logout(); // Call the logout function from AuthContext
         navigate("/"); // Navigate to home page
+    };
+
+    const handleChange = (e) => {
+        setLocation(e.target.value);
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        navigateToWeather(navigate, location);
     };
 
     return (
@@ -43,12 +60,20 @@ const AppNavbar = () => {
                         </Nav.Link>
                     )}
                 </Nav>
-                <Form className="d-flex ms-auto">
-                    <FormControl type="text" placeholder="Location search..." className="me-2" />
-                    <Button variant="outline-success">
-                        <BsSearch />
-                    </Button>
-                </Form>
+                {getPath() !== "/" && (
+                    // Only render this if search bar isn't visible (if not on home)
+                    <Form onSubmit={handleSubmit} className="d-flex ms-auto">
+                        <FormControl
+                            type="text"
+                            placeholder="Location search..."
+                            className="me-2"
+                            onChange={handleChange}
+                        />
+                        <Button type="submit" variant="outline-success">
+                            <BsSearch />
+                        </Button>
+                    </Form>
+                )}
             </Navbar.Collapse>
         </Navbar>
     );
