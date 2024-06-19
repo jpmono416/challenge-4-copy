@@ -5,7 +5,12 @@ import { BsSearch } from "react-icons/bs";
 import { AuthContext } from "../../auth/AuthProvider.jsx";
 
 const AppNavbar = () => {
-    const { authToken } = useContext(AuthContext); // Replace with your login logic
+    const { authToken, logout } = useContext(AuthContext); // Replace with your login logic
+
+    const handleLogout = () => {
+        logout(); // Call the logout function from AuthContext
+        navigate("/"); // Navigate to home page
+    };
 
     return (
         <Navbar bg="dark" expand="lg" className="text-white px-5">
@@ -19,9 +24,19 @@ const AppNavbar = () => {
                         Home
                     </Nav.Link>
                     {authToken !== "" ? (
-                        <Nav.Link as={Link} to="/favourites" className="text-white px-5">
-                            My saved Locations
-                        </Nav.Link>
+                        <>
+                            <Nav.Link as={Link} to="/favourites" className="text-white px-5">
+                                My saved Locations
+                            </Nav.Link>
+                            <Nav.Link
+                                as={Button}
+                                onClick={handleLogout}
+                                className="text-white px-5"
+                                style={{ cursor: "pointer" }}
+                            >
+                                Logout
+                            </Nav.Link>
+                        </>
                     ) : (
                         <Nav.Link as={Link} to="/login" className="text-white px-1">
                             Login
