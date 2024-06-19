@@ -11,6 +11,8 @@ const LoginCard = () => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [validationMessage, setValidationMessage] = useState("");
+    const { login } = useContext(AuthContext);
+
     const navigate = useNavigate();
 
     const handleSwitchForm = () => {
@@ -20,56 +22,53 @@ const LoginCard = () => {
         //? Intentionally not resetting the relevant fields when switching forms as it can be annoying for the user
     };
 
-    const { login } = useContext(AuthContext);
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setValidationMessage("");
+    const processUserAuthenticationResponse = async (response) => {
+    if (response.failed) {
+        setValidationMessage(response.message);
+        return false;
+    }
 
-        if (isRegister) {
-            const validation = UserService.validateCredentials({
-                email,
-                password,
-                confirmPassword,
-            });
-            console.log("Validation: ", validation);
+    const {
+        user: { password: _, ...userWithoutPassword }, // Destructure password out of the user for storage
+        token,
+    } = response;
 
-            if (!validation.isValid) setValidationMessage(validation.message);
-            else {
-                const response = await UserService.registerUser({ email, password });
-                if (response.failed) {
-                    setValidationMessage(response.message);
-                    return;
-                }
+    if (login(userWithoutPassword, token)) {
+        // Backend tokens are set to expire in 24h
+        Cookies.set("token", token, { expires: 1 });
 
-                const {
-                    user: { password: _, ...userWithoutPassword }, // Destructure password out of the user for storage
-                    token,
-                } = response;
+        localStorage.setItem("user", JSON.stringify(userWithoutPassword));
+        localStorage.setItem("token", token);
+        
+        navigate("/");
+        return true;
+    }
+    return false;
+};
 
-                if (login(userWithoutPassword, token)) {
-                    //? Backend tokens are set to expire in 24h
-                    Cookies.set("token", token, { expires: 1 });
-                    navigate("/");
-                }
-            }
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    setValidationMessage("");
+
+    if (isRegister) {
+        const validation = UserService.validateCredentials({
+            email,
+            password,
+            confirmPassword,
+        });
+        console.log("Validation: ", validation);
+
+        if (!validation.isValid) {
+            setValidationMessage(validation.message);
         } else {
-            const response = await UserService.loginUser({ email, password });
-            if (response.failed) {
-                setValidationMessage(response.message);
-                return;
-            }
-            // Destructure to exclude password from the user object
-            const {
-                user: { password: _, ...userWithoutPassword },
-                token,
-            } = response;
-            if (login(userWithoutPassword, token)) {
-                //? Backend tokens are set to expire in 24h
-                Cookies.set("token", token, { expires: 1 });
-                navigate("/");
-            }
+            const response = await UserService.registerUser({ email, password });
+            await processUserAuthenticationResponse(response);
         }
-    };
+    } else {
+        const response = await UserService.loginUser({ email, password });
+        await processUserAuthenticationResponse(response);
+    }
+};
 
     return (
         <div

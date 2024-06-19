@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { Container, Row, Col, Alert } from "react-bootstrap";
 import FavouriteRow from "./FavouriteRow";
 import UserService from "../../service/User.service.js";
@@ -9,7 +10,8 @@ const FavouriteSection = () => {
     const [favourites, setFavourites] = useState([]);
     const [alert, showAlert] = useAlert();
     const { authToken, userDetails } = useContext(AuthContext);
-
+    const navigate = useNavigate();
+    
     const updateFavouritesList = (removedLocation) => {
         setFavourites((currentFavourites) =>
             currentFavourites.filter((location) => location !== removedLocation)
@@ -21,6 +23,12 @@ const FavouriteSection = () => {
     };
 
     useEffect(() => {
+        // Redirect to /login if authToken is empty
+        if (authToken === "") {
+            navigate("/login");
+            return; // Prevent further execution
+        }
+
         const fetchFavorites = async () => {
             console.log("Sending", userDetails.email, authToken);
             const response = await UserService.getFavouriteLocations(userDetails.email, authToken);
