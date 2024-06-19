@@ -1,36 +1,62 @@
-import React from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import React, { useEffect, useState, useContext } from "react";
+import { Container, Row, Col, Alert } from "react-bootstrap";
 import FavouriteRow from "./FavouriteRow";
+import UserService from "../../service/User.service.js";
+import { AuthContext } from "../../auth/AuthProvider.jsx";
+import useAlert from "../../hooks/useAlert";
 
 const FavouriteSection = () => {
-	const handleRemoveFromFavorites = () => {
-		console.log("Remove"); // TODO implement this later
-	};
+    const [favourites, setFavourites] = useState([]);
+    const [alert, showAlert] = useAlert();
+    const { authToken, userDetails } = useContext(AuthContext);
 
-	const favorites = [
-		{ location: "Location 1",  },
-		{ location: "Location 2",  },
-		{ location: "Location 2",  },
-		{ location: "Location 2",  },
-		{ location: "Location 2",  },
-		{ location: "Location 2",  },
+    const updateFavouritesList = (removedLocation) => {
+        setFavourites((currentFavourites) =>
+            currentFavourites.filter((location) => location !== removedLocation)
+        );
+    };
 
-		// Add more favorite locations here
-	];
+    const handleAlert = (message, variant) => {
+        showAlert(message, variant);
+    };
 
-	return (
-		<Container style={{ padding: "0 50px" }}>
-			<h1 className="text-center"> Favourite locations </h1>
+    useEffect(() => {
+        const fetchFavorites = async () => {
+            console.log("Sending", userDetails.email, authToken);
+            const response = await UserService.getFavouriteLocations(userDetails.email, authToken);
+            if (!response.failed) {
+                console.log("Data: ", response);
+                setFavourites(response);
+            } else {
+                // Handle error or display a message
+                console.error(response.message);
+            }
+        };
 
-			<Row>
-				{favorites.map((favorite, index) => (
-					<Col xs={12} md={6} lg={4} key={index}>
-						<FavouriteRow location={favorite.location} onRemove={handleRemoveFromFavorites} />
-					</Col>
-				))}
-			</Row>
-		</Container>
-	);
+        fetchFavorites();
+    }, []); // Empty dependency array means this effect runs once on mount
+
+    return (
+        <>
+            {alert.show && <Alert variant={alert.variant}>{alert.message}</Alert>}
+
+            <Container style={{ padding: "0 50px" }}>
+                <h1 className="text-center">Favourite locations</h1>
+
+                <Row>
+                    {favourites.map((location, index) => (
+                        <Col xs={12} md={6} lg={4} key={index}>
+                            <FavouriteRow
+                                location={location}
+                                onRemove={updateFavouritesList}
+                                onAlert={handleAlert}
+                            />
+                        </Col>
+                    ))}
+                </Row>
+            </Container>
+        </>
+    );
 };
 
 export default FavouriteSection;

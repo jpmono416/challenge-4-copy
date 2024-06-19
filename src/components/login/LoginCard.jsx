@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import { Card, Form, Button, Alert } from "react-bootstrap";
-import AuthProvider, { AuthContext } from "../../auth/AuthProvider.jsx";
+import { AuthContext } from "../../auth/AuthProvider.jsx";
 import UserService from "../../service/User.service.js";
 
 const LoginCard = () => {
@@ -31,6 +31,7 @@ const LoginCard = () => {
                 password,
                 confirmPassword,
             });
+            console.log("Validation: ", validation);
 
             if (!validation.isValid) setValidationMessage(validation.message);
             else {
@@ -44,28 +45,29 @@ const LoginCard = () => {
                     user: { password: _, ...userWithoutPassword }, // Destructure password out of the user for storage
                     token,
                 } = response;
-                console.log("User: ", userWithoutPassword, "Token: ", token);
-                
-                if (login(userWithoutPassword, token))
-                {
+
+                if (login(userWithoutPassword, token)) {
                     //? Backend tokens are set to expire in 24h
                     Cookies.set("token", token, { expires: 1 });
                     navigate("/");
                 }
-
             }
         } else {
-            // const response = await UserService.loginUser({ email, password });
-            // if (response.failed) {
-            //     setValidationMessage(response.message);
-            //     return;
-            // }
-            // // Destructure to exclude password from the user object
-            // const {
-            //     user: { password: _, ...userWithoutPassword },
-            //     token,
-            // } = response;
-            // console.log("User: ", userWithoutPassword, "Token: ", token);
+            const response = await UserService.loginUser({ email, password });
+            if (response.failed) {
+                setValidationMessage(response.message);
+                return;
+            }
+            // Destructure to exclude password from the user object
+            const {
+                user: { password: _, ...userWithoutPassword },
+                token,
+            } = response;
+            if (login(userWithoutPassword, token)) {
+                //? Backend tokens are set to expire in 24h
+                Cookies.set("token", token, { expires: 1 });
+                navigate("/");
+            }
         }
     };
 
